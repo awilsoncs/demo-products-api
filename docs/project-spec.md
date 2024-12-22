@@ -9,7 +9,7 @@ Create a simple product catalog service, where you can add, edit, or remove prod
 Key AWS Services
 
 - AWS Lambda for the business logic (add product, remove product, update inventory).
--Amazon DynamoDB to store product details (name, price, stock).
+- Amazon DynamoDB to store product details (name, price, stock).
 - Amazon API Gateway to expose RESTful endpoints for CRUD operations.
 - Amazon S3 (optional) to store product images.
 
@@ -78,54 +78,6 @@ graph TD
     G -->|Make Purchases| A
     H -->|Manage Products| A
     H -->|Manage Users| A
-```
-
-## Project Structure
-
-The project is organized into the following directories:
-
-```
-inventory-management-demo/
-├── backend/
-│   ├── src/
-│   │   ├── functions/
-│   │   │   ├── auth/
-│   │   │   │   ├── handler.js
-│   │   │   │   ├── index.js
-│   │   │   ├── product/
-│   │   │   │   ├── handler.js
-│   │   │   │   ├── index.js
-│   │   │   ├── user/
-│   │   │   │   ├── handler.js
-│   │   │   │   ├── index.js
-│   │   ├── models/
-│   │   │   ├── productModel.js
-│   │   │   └── userModel.js
-│   │   ├── services/
-│   │   │   ├── authService.js
-│   │   │   ├── productService.js
-│   │   │   └── userService.js
-│   │   ├── utils/
-│   │   │   └── dbUtils.js
-│   ├── tests/
-│   │   ├── auth/
-│   │   │   ├── handler.test.js
-│   │   ├── product/
-│   │   │   ├── handler.test.js
-│   │   ├── user/
-│   │   │   ├── handler.test.js
-│   ├── package.json
-│   └── serverless.yml
-├── terraform/
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   └── provider.tf
-├── docs/
-│   ├── PROJECT-SPEC.md
-│   ├── API-DOCUMENTATION.md
-│   └── ARCHITECTURE.md
-└── README.md
 ```
 
 ## Finalizing the Project

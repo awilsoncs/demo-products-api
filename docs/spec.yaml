@@ -5,6 +5,9 @@ info:
   description: API for managing users and products in the inventory management system.
 
 paths:
+  # ---------------------
+  # Public endpoints
+  # ---------------------
   /auth/signup:
     post:
       summary: Sign up a new user
@@ -16,7 +19,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SignupUser'
+              $ref: '#/components/schemas/LoginUser'
       responses:
         '200':
           description: User signed up successfully
@@ -76,13 +79,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  
+  # ---------------------
+  # Protected endpoints
+  # ---------------------
   /products:
     get:
       summary: Get a list of all products
       operationId: getProducts
       security:
-        - CognitoAuth: ['read']
+        - cognitoAuth:
+          - read-products
       responses:
         '200':
           description: A list of products
@@ -109,7 +116,8 @@ paths:
       summary: Add a new product
       operationId: addProduct
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - write-products
       requestBody:
         description: Product details
         required: true
@@ -138,7 +146,8 @@ paths:
       summary: Get details of a specific product
       operationId: getProduct
       security:
-        - CognitoAuth: ['read']
+        - cognitoAuth:
+          - read-products
       parameters:
         - name: productId
           in: path
@@ -169,7 +178,8 @@ paths:
       summary: Update a product by ID
       operationId: updateProduct
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - write-products
       parameters:
         - name: productId
           in: path
@@ -203,7 +213,8 @@ paths:
       summary: Delete a product by ID
       operationId: deleteProduct
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - write
       parameters:
         - name: productId
           in: path
@@ -231,7 +242,8 @@ paths:
       summary: Get a list of all users
       operationId: getUsers
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - read-users
       responses:
         '200':
           description: A list of users
@@ -253,13 +265,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    
+    post:
+      summary: Add a new user
+      operationId: addUser
+      security:
+        - cognitoAuth:
+          - write-users
+      requestBody:
+        description: User details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User added successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /users/{userId}:
     delete:
       summary: Delete a user by ID
       operationId: deleteUser
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - write-users
       parameters:
         - name: userId
           in: path
@@ -286,7 +328,8 @@ paths:
       summary: Update the role of a user
       operationId: updateUserRole
       security:
-        - CognitoAuth: ['admin']
+        - cognitoAuth:
+          - write-users
       parameters:
         - name: userId
           in: path
@@ -320,67 +363,119 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 components:
+  securitySchemes:
+    cognitoAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/authorize
+          tokenUrl: https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/token
+          scopes:
+            read-products: "Read access to product data"
+            write-products: "Write access to product data"
+            read-users: "Read access to user data"
+            write-users: "Write access to user data"
 
-    schemas:
-      Product:
-        type: object
-        properties:
-          productId:
-            type: string
-          name:
-            type: string
-          price:
-            type: number
-          description:
-            type: string
-  
-      User:
-        type: object
-        properties:
-          userId:
-            type: string
-          username:
-            type: string
-          password:
-            type: string
-          role:
-            type: string
-  
-      SignupUser:
-        type: object
-        properties:
-          username:
-            type: string
-          password:
-            type: string
-          email:
-            type: string
-        required:
-          - username
-          - password
-          - email
-  
-      LoginUser:
-        type: object
-        properties:
-          username:
-            type: string
-          password:
-            type: string
-        required:
-          - username
-          - password
-          
-      Error:
-        type: object
-        properties:
-          message: 
-            type: string
-        required:
-          - message
+  schemas:
+    RecordMeta:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time when the record was created
+        created_by:
+          type: string
+          description: User ID of the user who created the record
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time when the record was last updated
+        updated_by:
+          type: string
+          description: User ID of the user who last updated the record
+      required:
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+
+    Product:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: UUID of the product
+        name:
+          type: string
+          description: Name of the product
+        price:
+          type: number
+          description: Price of the product in USD micros
+        description:
+          type: string
+          description: Description of the product
+        quantity:
+          type: integer
+          description: Quantity of the product in stock
+        meta:
+          $ref: '#/components/schemas/RecordMeta'
+      required:
+        - name
+        - price
+        - quantity
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: UUID of the user
+        username:
+          type: string
+          format: email
+          description: Email address of the user
+        password:
+          type: string
+          format: hashed password
+          description: Hashed password of the user
+        meta:
+          $ref: '#/components/schemas/RecordMeta'
+      required:
+        - username
+
+    LoginUser:
+      type: object
+      description: User login and signup details
+      properties:
+        username:
+          type: string
+          description: Email address of the user
+        password:
+          type: string
+          description: Hashed password of the user
+      required:
+        - username
+        - password
+        
+    Error:
+      type: object
+      properties:
+        message: 
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+        details:
+          type: string
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Time of the error
 
 security:
-  CognitoAuth:
-    type: apiKey
-    in: header
-    name: Authorization
+  - cognitoAuth: 
+      - read
