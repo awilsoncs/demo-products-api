@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "user_pool" {
-  name = "inventory_user_pool"
+  name = "${var.app_name}-user_pool"
 
   password_policy {
     minimum_length    = 8
@@ -13,13 +13,13 @@ resource "aws_cognito_user_pool" "user_pool" {
 }
 
 resource "aws_cognito_user_pool_client" "user_pool_client" {
-  name            = "inventory_user_pool_client"
+  name            = "${var.app_name}-user_pool_client"
   user_pool_id    = aws_cognito_user_pool.user_pool.id
   generate_secret = false
 }
 
 resource "aws_cognito_identity_pool" "identity_pool" {
-  identity_pool_name               = "inventory_identity_pool"
+  identity_pool_name               = "${var.app_name}-identity_pool"
   allow_unauthenticated_identities = false
 
   cognito_identity_providers {
@@ -65,7 +65,7 @@ resource "aws_cognito_identity_pool_role_attachment" "identity_pool_role_attachm
 }
 
 resource "aws_iam_role" "visitor_role" {
-  name = "Cognito_Visitor_Role"
+  name = "${var.app_name}-Cognito_Visitor_Role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -95,7 +95,7 @@ resource "aws_iam_role_policy_attachment" "visitor_role_policy" {
 }
 
 resource "aws_iam_role" "user_role" {
-  name = "Cognito_User_Role"
+  name = "${var.app_name}-Cognito_User_Role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -125,7 +125,7 @@ resource "aws_iam_role_policy_attachment" "user_role_policy" {
 }
 
 resource "aws_iam_role" "admin_role" {
-  name = "Cognito_Admin_Role"
+  name = "${var.app_name}-Cognito_Admin_Role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

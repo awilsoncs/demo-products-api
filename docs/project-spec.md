@@ -1,10 +1,8 @@
 # Project Specification - Serverless Product Catalog & Inventory
 
-For each project, be sure to include a clear readme, architecture diagrams, deployment instructions (e.g., SAM or CDK templates), and a demo video or screenshots if possible.
-
 ## Core Idea
 
-Create a simple product catalog service, where you can add, edit, or remove products and track inventory in real time. The service should expose RESTful endpoints to manage products and inventory.
+A simple product catalog service, where you can add, edit, or remove products and track inventory in real time. The service should expose RESTful endpoints to manage products and inventory.
 
 Key AWS Services
 
