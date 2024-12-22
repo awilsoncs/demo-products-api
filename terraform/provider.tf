@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
     bucket         = "acwilson-core-terraform"
-    key            = "${var.app_name}.tfstate"
-    region         = var.region
+    key            = "acwilson-inventory-management-demo.tfstate"
+    region         = "us-east-1"
     encrypt        = true
   }
 }
