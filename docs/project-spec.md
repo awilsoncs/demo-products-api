@@ -51,36 +51,6 @@ Business Relevance
 - Create another role for updating the stock of a product.
 - Integrate a front-end (React or Vue) to display the product catalog.
 - Add CloudFront for a global content delivery layer.
-
-## Architecture Diagram
-
-This diagram shows the high-level architecture of the product catalog service. The service is built using AWS Lambda, Amazon API Gateway, and Amazon DynamoDB. The service is secured using Amazon Cognito for user authentication.
-
-```mermaid
-graph TD
-    subgraph AWS
-        A[Amazon API Gateway] --> B[AWS Lambda]
-        B --> C[Amazon DynamoDB]
-        B --> D[Amazon S3]
-        %% E[Amazon Cognito] --> A
-    end
-
-    subgraph User
-        F[Visitor]
-        G[User]
-        H[Admin]
-    end
-
-    F -->|Sign Up| E
-    F -->|Log In| E
-    G -->|Log Out| E
-    G -->|View Products| A
-    G -->|Make Purchases| A
-    H -->|Manage Products| A
-    H -->|Manage Users| A
-```
-
-## Finalizing the Project
-
-- Deployment
-- Github Actions
+- Implement a CI/CD pipeline for automated deployments.
+- Implement a monitoring solution for tracking usage and performance.
+- Implement multitenancy for managing multiple stores.

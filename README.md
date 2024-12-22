@@ -20,30 +20,21 @@ This project is a serverless inventory management system that allows users to ma
 - **Amazon DynamoDB**: For storing product and user data.
 - **Amazon Cognito**: For user authentication and authorization.
 
-## API Endpoints
-
-### Authentication
-
-- **Sign Up**: `POST /auth/signup`
-- **Log In**: `POST /auth/login`
-
-### Products
-
-- **Get All Products**: `GET /products`
-- **Add a New Product**: `POST /products`
-- **Get Product by ID**: `GET /products/{productId}`
-- **Update Product by ID**: `PUT /products/{productId}`
-- **Delete Product by ID**: `DELETE /products/{productId}`
-
-### Users
-
-- **Get All Users**: `GET /users`
-- **Update User Role**: `PUT /users/{userId}`
-- **Delete User by ID**: `DELETE /users/{userId}`
-
 ## Deployment
 
 The project is deployed using Terraform. The Terraform configuration files are located in the `terraform/` directory.
+
+## Viewing the API Documentation
+
+The API documentation is available via Swagger UI. To view the documentation, follow the steps below:
+
+Start the server:
+
+```bash
+node backend/swagger.js
+```
+
+Then, navigate to [http://localhost:3000/api-docs](http://localhost:3000/api-docs) in your browser.
 
 ## Documentation
 
@@ -51,6 +42,7 @@ The project is deployed using Terraform. The Terraform configuration files are l
 - [Usage Guide](docs/usage.md)
 - [Project Specification](docs/project-spec.md)
 - [API Specification](docs/spec.yaml)
+- [Architecture Diagram](docs/architecture-diagram.png)
 
 ## License
 
