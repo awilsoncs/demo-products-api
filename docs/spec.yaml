@@ -386,6 +386,7 @@ components:
           description: Date and time when the record was created
         created_by:
           type: string
+          format: uuid
           description: User ID of the user who created the record
         updated_at:
           type: string
@@ -393,6 +394,7 @@ components:
           description: Date and time when the record was last updated
         updated_by:
           type: string
+          format: uuid
           description: User ID of the user who last updated the record
       required:
         - created_at
@@ -431,6 +433,7 @@ components:
       properties:
         userId:
           type: string
+          format: uuid
           description: UUID of the user
         username:
           type: string
@@ -451,9 +454,11 @@ components:
       properties:
         username:
           type: string
+          format: email
           description: Email address of the user
         password:
           type: string
+          format: hashed password
           description: Hashed password of the user
       required:
         - username
@@ -478,4 +483,4 @@ components:
 
 security:
   - cognitoAuth: 
-      - read
+      - read-products
