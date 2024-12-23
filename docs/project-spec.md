@@ -52,3 +52,4 @@ Business Relevance
 - Implement a CI/CD pipeline for automated deployments.
 - Implement a monitoring solution for tracking usage and performance.
 - Implement multitenancy for managing multiple stores.
+- Provide environment-specific configurations for development, staging, and production.

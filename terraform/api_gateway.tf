@@ -3,6 +3,15 @@ resource "aws_api_gateway_rest_api" "inventory_api" {
   description = "API for managing users and products in the inventory management system."
 }
 
+resource "aws_api_gateway_authorizer" "cognito_authorizer" {
+  rest_api_id = aws_api_gateway_rest_api.inventory_api.id
+  name        = "cognito-authorizer"
+  type        = "COGNITO_USER_POOLS"
+  provider_arns = [
+    aws_cognito_user_pool.user_pool.arn
+  ]
+}
+
 resource "aws_api_gateway_resource" "auth" {
   rest_api_id = aws_api_gateway_rest_api.inventory_api.id
   parent_id   = aws_api_gateway_rest_api.inventory_api.root_resource_id
@@ -44,56 +53,56 @@ resource "aws_api_gateway_method" "products_get" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.products.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "products_post" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.products.id
   http_method   = "POST"
-  authorization = "NONE"
-}
-
-resource "aws_api_gateway_method" "product_get" {
-  rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
-  resource_id   = aws_api_gateway_resource.product.id
-  http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "product_put" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.product.id
   http_method   = "PUT"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "product_delete" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.product.id
   http_method   = "DELETE"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "users_get" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.users.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "user_delete" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.user.id
   http_method   = "DELETE"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_method" "user_put" {
   rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
   resource_id   = aws_api_gateway_resource.user.id
   http_method   = "PUT"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito_authorizer.id
 }
 
 resource "aws_api_gateway_integration" "auth_post_integration" {
@@ -120,15 +129,6 @@ resource "aws_api_gateway_integration" "products_post_integration" {
   http_method = aws_api_gateway_method.products_post.http_method
   type        = "AWS_PROXY"
   integration_http_method = "POST"
-  uri         = aws_lambda_function.products_lambda.invoke_arn
-}
-
-resource "aws_api_gateway_integration" "product_get_integration" {
-  rest_api_id = aws_api_gateway_rest_api.inventory_api.id
-  resource_id = aws_api_gateway_resource.product.id
-  http_method = aws_api_gateway_method.product_get.http_method
-  type        = "AWS_PROXY"
-  integration_http_method = "GET"
   uri         = aws_lambda_function.products_lambda.invoke_arn
 }
 
@@ -182,7 +182,6 @@ resource "aws_api_gateway_deployment" "inventory_api_deployment" {
     aws_api_gateway_integration.auth_post_integration,
     aws_api_gateway_integration.products_get_integration,
     aws_api_gateway_integration.products_post_integration,
-    aws_api_gateway_integration.product_get_integration,
     aws_api_gateway_integration.product_put_integration,
     aws_api_gateway_integration.product_delete_integration,
     aws_api_gateway_integration.users_get_integration,
@@ -191,5 +190,11 @@ resource "aws_api_gateway_deployment" "inventory_api_deployment" {
   ]
 
   rest_api_id = aws_api_gateway_rest_api.inventory_api.id
-  stage_name  = "prod"
+  description = "Deployment for the Inventory Management API"
+}
+
+resource "aws_api_gateway_stage" "inventory_api_stage" {
+  stage_name    = "demo"
+  rest_api_id   = aws_api_gateway_rest_api.inventory_api.id
+  deployment_id = aws_api_gateway_deployment.inventory_api_deployment.id
 }
