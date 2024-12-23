@@ -13,23 +13,18 @@ resource "aws_cognito_user_pool" "user_pool" {
 }
 
 resource "aws_cognito_user_pool_client" "user_pool_client" {
-  name            = "${var.app_name}-user_pool_client"
-  user_pool_id    = aws_cognito_user_pool.user_pool.id
-  generate_secret = false
-  allowed_oauth_flows = ["code"]
-  allowed_oauth_scopes = [
-    "openid",
-    "email",
-    "profile",
-    "aws.cognito.signin.user.admin",
-    "read-products",
-    "write-products",
-    "read-users",
-    "write-users"
-  ]
+  name                                 = "${var.app_name}-user_pool_client"
+  user_pool_id                         = aws_cognito_user_pool.user_pool.id
+  callback_urls                        = ["https://example.com"]
   allowed_oauth_flows_user_pool_client = true
-  callback_urls = ["https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/idpresponse"]
-  logout_urls = ["https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/logout"]
+  generate_secret = false
+  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile", "aws.cognito.signin.user.admin"]
+  supported_identity_providers         = ["COGNITO"]
+}
+
+resource "aws_cognito_user_pool" "pool" {
+  name = "pool"
 }
 
 resource "aws_cognito_identity_pool" "identity_pool" {
@@ -44,6 +39,12 @@ resource "aws_cognito_identity_pool" "identity_pool" {
 
 resource "aws_cognito_identity_pool_roles_attachment" "identity_pool_roles" {
   identity_pool_id = aws_cognito_identity_pool.identity_pool.id
+
+  depends_on = [
+    aws_iam_role.visitor_role,
+    aws_iam_role.user_role,
+    aws_iam_role.admin_role,
+  ]
 
   roles = {
     authenticated   = aws_iam_role.user_role.arn
@@ -60,7 +61,7 @@ resource "aws_cognito_identity_pool_roles_attachment" "identity_pool_role_attach
 
   role_mapping {
     identity_provider = "cognito-idp.${var.region}.amazonaws.com/${aws_cognito_user_pool.user_pool.id}:${aws_cognito_user_pool_client.user_pool_client.id}"
-    type              = "Token"
+    type              = "Rules"
     ambiguous_role_resolution = "AuthenticatedRole"
     mapping_rule {
       claim      = "cognito:groups"
@@ -75,94 +76,4 @@ resource "aws_cognito_identity_pool_roles_attachment" "identity_pool_role_attach
       role_arn   = aws_iam_role.user_role.arn
     }
   }
-}
-
-resource "aws_iam_role" "visitor_role" {
-  name = "${var.app_name}-Cognito_Visitor_Role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          "StringEquals" = {
-            "cognito-identity.amazonaws.com:aud" = aws_cognito_identity_pool.identity_pool.id
-          }
-          "ForAnyValue:StringLike" = {
-            "cognito-identity.amazonaws.com:amr" = "unauthenticated"
-          }
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "visitor_role_policy" {
-  role       = aws_iam_role.visitor_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CognitoGuestUser"
-}
-
-resource "aws_iam_role" "user_role" {
-  name = "${var.app_name}-Cognito_User_Role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          "StringEquals" = {
-            "cognito-identity.amazonaws.com:aud" = aws_cognito_identity_pool.identity_pool.id
-          }
-          "ForAnyValue:StringLike" = {
-            "cognito-identity.amazonaws.com:amr" = "authenticated"
-          }
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "user_role_policy" {
-  role       = aws_iam_role.user_role.name
-  policy_arn = "arn:aws:iam::aws:policy/CognitoPowerUser"
-}
-
-resource "aws_iam_role" "admin_role" {
-  name = "Cognito_Admin_Role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Federated = "cognito-identity.amazonaws.com"
-        }
-        Action = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          "StringEquals" = {
-            "cognito-identity.amazonaws.com:aud" = aws_cognito_identity_pool.identity_pool.id
-          }
-          "ForAnyValue:StringLike" = {
-            "cognito-identity.amazonaws.com:amr" = "authenticated"
-          }
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "admin_role_policy" {
-  role       = aws_iam_role.admin_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
