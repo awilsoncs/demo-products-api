@@ -1,14 +1,9 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 
-const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.INVENTORY_TABLE_NAME;
-
-if (!tableName) {
-  throw new Error('Table name is not defined');
-}
-
-export const handler: APIGatewayProxyHandler = async (event, context) => {
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  const dynamoDb = new DynamoDB.DocumentClient();
+  const tableName = process.env.INVENTORY_TABLE_NAME;
   const id = event.pathParameters?.id;
 
   if (!id) {
@@ -16,6 +11,10 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
       statusCode: 400,
       body: JSON.stringify({ error: 'User ID is required' }),
     };
+  }
+
+  if (!tableName) {
+    throw new Error('Table name is not defined');
   }
 
   const params = {

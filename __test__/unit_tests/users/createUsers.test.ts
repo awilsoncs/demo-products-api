@@ -1,4 +1,4 @@
-import { handler } from '../../src/users/createUsers';
+import { handler } from '../../../src/users/createUsers';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
