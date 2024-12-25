@@ -1,10 +1,11 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 
-const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.INVENTORY_TABLE_NAME!;
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  
+  const dynamoDb = new DynamoDB.DocumentClient();
+  const tableName = process.env.INVENTORY_TABLE_NAME!;
 
-export const handler: APIGatewayProxyHandler = async (event, context) => {
   const id = event.pathParameters?.id;
 
   const params = {
