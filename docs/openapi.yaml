@@ -1,0 +1,499 @@
+openapi: 3.0.0
+info:
+  title: Inventory Management API
+  version: 1.0.0
+  description: API for managing users and products in the inventory management system.
+
+paths:
+  # ---------------------
+  # Public endpoints
+  # ---------------------
+  /health:
+    get:
+      summary: Check the health of the API
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/signup:
+    post:
+      summary: Sign up a new user
+      operationId: signupUser
+      security: []
+      requestBody:
+        description: User sign up details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        '200':
+          description: User signed up successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      summary: Log in an existing user
+      operationId: loginUser
+      security: []
+      requestBody:
+        description: User login details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT token
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  # ---------------------
+  # Protected endpoints
+  # ---------------------
+  /products:
+    get:
+      summary: Get a list of all products
+      operationId: getProducts
+      security:
+        - cognitoAuth:
+          - read-products
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Add a new product
+      operationId: addProduct
+      security:
+        - cognitoAuth:
+          - write-products
+      requestBody:
+        description: Product details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product added successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /products/{productId}:
+    get:
+      summary: Get details of a specific product
+      operationId: getProduct
+      security:
+        - cognitoAuth:
+          - read-products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update a product by ID
+      operationId: updateProduct
+      security:
+        - cognitoAuth:
+          - write-products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Updated product details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product updated successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a product by ID
+      operationId: deleteProduct
+      security:
+        - cognitoAuth:
+          - write
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      summary: Get a list of all users
+      operationId: getUsers
+      security:
+        - cognitoAuth:
+          - read-users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    post:
+      summary: Add a new user
+      operationId: addUser
+      security:
+        - cognitoAuth:
+          - write-users
+      requestBody:
+        description: User details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User added successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    delete:
+      summary: Delete a user by ID
+      operationId: deleteUser
+      security:
+        - cognitoAuth:
+          - write-users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update the role of a user
+      operationId: updateUserRole
+      security:
+        - cognitoAuth:
+          - write-users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: New role for the user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+      responses:
+        '200':
+          description: User role updated successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    cognitoAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/authorize
+          tokenUrl: https://YOUR-COGNITO-DOMAIN.auth.us-east-1.amazoncognito.com/oauth2/token
+          scopes:
+            read-products: "Read access to product data"
+            write-products: "Write access to product data"
+            read-users: "Read access to user data"
+            write-users: "Write access to user data"
+
+  schemas:
+    RecordMeta:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time when the record was created
+        created_by:
+          type: string
+          format: uuid
+          description: User ID of the user who created the record
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time when the record was last updated
+        updated_by:
+          type: string
+          format: uuid
+          description: User ID of the user who last updated the record
+      required:
+        - created_at
+        - created_by
+        - updated_at
+        - updated_by
+
+    Product:
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+          description: UUID of the product
+        name:
+          type: string
+          description: Name of the product
+        price:
+          type: number
+          description: Price of the product in USD micros
+        description:
+          type: string
+          description: Description of the product
+        quantity:
+          type: integer
+          description: Quantity of the product in stock
+        meta:
+          $ref: '#/components/schemas/RecordMeta'
+      required:
+        - name
+        - price
+        - quantity
+
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: UUID of the user
+        username:
+          type: string
+          format: email
+          description: Email address of the user
+        password:
+          type: string
+          format: hashed password
+          description: Hashed password of the user
+        meta:
+          $ref: '#/components/schemas/RecordMeta'
+      required:
+        - username
+
+    LoginUser:
+      type: object
+      description: User login and signup details
+      properties:
+        username:
+          type: string
+          format: email
+          description: Email address of the user
+        password:
+          type: string
+          format: hashed password
+          description: Hashed password of the user
+      required:
+        - username
+        - password
+        
+    Error:
+      type: object
+      properties:
+        message: 
+          type: string
+          description: Error message
+        code:
+          type: integer
+          description: Error code
+        details:
+          type: string
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Time of the error
+
+security:
+  - cognitoAuth: 
+      - read-products

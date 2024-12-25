@@ -1,0 +1,68 @@
+service: inventory-management
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: dev
+  region: us-east-1
+
+functions:
+  healthCheck:
+    handler: src/healthCheck.handler
+    events:
+      - http:
+          path: /health
+          method: get
+  getUsers:
+    handler: src/users/getUsers.handler
+    events:
+      - http:
+          path: /users
+          method: get
+  getUser:
+    handler: src/users/getUser.handler
+    events:
+      - http:
+          path: /users/{id}
+          method: get
+  createUser:
+    handler: src/users/createUser.handler
+    events:
+      - http:
+          path: /users
+          method: post
+  updateUser:
+    handler: src/users/updateUser.handler
+    events:
+      - http:
+          path: /users/{id}
+          method: put
+  deleteUser:
+    handler: src/users/deleteUser.handler
+    events:
+      - http:
+          path: /users/{id}
+          method: delete
+
+resources:
+  Resources:
+    InventoryTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Users
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+  Outputs:
+    InventoryTableName:
+      Value:
+        Ref: InventoryTable
+      Export:
+        Name: InventoryTableName
