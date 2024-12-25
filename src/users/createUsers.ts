@@ -1,15 +1,12 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
-const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.INVENTORY_TABLE_NAME;
 
-if (!tableName) {
-  throw new Error('Table name is not defined');
-}
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  const tableName = process.env.INVENTORY_TABLE_NAME;
+  const dynamoDb = new DynamoDB.DocumentClient();
 
-export const handler: APIGatewayProxyHandler = async (event, context) => {
   if (!event.body) {
     return {
       statusCode: 400,
@@ -26,17 +23,26 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
     };
   }
 
+  const userId = uuidv4();
+
+  if (!tableName) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Table name is not defined in environment variables' }),
+    };
+  }
+
   const params = {
     TableName: tableName,
     Item: {
-      userId: uuidv4(),
+      userId,
       username,
-      password, // In a real application, ensure this is hashed
+      password,
       meta: {
         created_at: new Date().toISOString(),
-        created_by: 'system', // Replace with actual user ID in a real application
+        created_by: 'system',
         updated_at: new Date().toISOString(),
-        updated_by: 'system', // Replace with actual user ID in a real application
+        updated_by: 'system',
       },
     },
   };
