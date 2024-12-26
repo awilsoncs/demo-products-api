@@ -1,10 +1,14 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import { DynamoDB } from 'aws-sdk';
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
-const dynamoDb = new DynamoDB.DocumentClient();
-const tableName = process.env.INVENTORY_TABLE_NAME!;
+export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  const client = new DynamoDBClient({});
+  const dynamoDb = DynamoDBDocumentClient.from(client);
+  const tableName = process.env.INVENTORY_TABLE_NAME;
 
-export const handler: APIGatewayProxyHandler = async (event, context) => {
+  // Validate input
+  console.debug('Updating user', event);
   const { id } = event.pathParameters || {};
   if (!id) {
     return {
@@ -12,12 +16,14 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
       body: JSON.stringify({ error: 'User ID is required' }),
     };
   }
+
   if (!event.body) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Request body is required' }),
     };
   }
+
   const { username, password } = JSON.parse(event.body);
 
   if (!username || !password) {
@@ -44,16 +50,17 @@ export const handler: APIGatewayProxyHandler = async (event, context) => {
       ':updated_at': new Date().toISOString(),
       ':updated_by': 'system', // Replace with actual user ID in a real application
     },
-    ReturnValues: 'ALL_NEW',
+    ReturnValues: 'ALL_NEW' as const,
   };
 
   try {
-    const data = await dynamoDb.update(params).promise();
+    const data = await dynamoDb.send(new UpdateCommand(params));
     return {
       statusCode: 200,
       body: JSON.stringify(data.Attributes),
     };
   } catch (error) {
+    console.error('Error updating user', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Could not update user' }),
