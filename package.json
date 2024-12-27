@@ -17,6 +17,7 @@
     "@aws-sdk/lib-dynamodb": "^3.716.0",
     "@types/node": "^22.10.2",
     "aws-sdk": "^2.1692.0",
+    "class-validator": "^0.14.1",
     "typescript": "^5.7.2"
   }
 }
