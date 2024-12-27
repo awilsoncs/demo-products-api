@@ -18,7 +18,7 @@ describe('getUsers handler', () => {
   let mDocumentClient: any;
 
   beforeAll(() => {
-    process.env.INVENTORY_TABLE_NAME = 'Users';
+    process.env.USERS_TABLE_NAME = 'Users';
   });
 
   beforeEach(() => {

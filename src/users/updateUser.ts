@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import { DynamoDB } from 'aws-sdk';
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
-    const tableName = process.env.INVENTORY_TABLE_NAME;
+    const tableName = process.env.USERS_TABLE_NAME;
     const dynamoDb = new DynamoDB.DocumentClient();
 
     if (!event.body) {

@@ -46,7 +46,7 @@ functions:
 
 resources:
   Resources:
-    InventoryTable:
+    UsersTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: Users
@@ -59,10 +59,28 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Products
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
   Outputs:
-    InventoryTableName:
+    UsersTableName:
       Value:
-        Ref: InventoryTable
+        Ref: UserTable
       Export:
-        Name: InventoryTableName
+        Name: USERS_TABLE_NAME
+    ProductsTableName:
+      Value:
+        Ref: ProductTable
+      Export:
+        Name: PRODUCTS_TABLE_NAME

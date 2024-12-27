@@ -19,7 +19,7 @@ DynamoDB.DocumentClient.prototype.delete = jest.fn().mockImplementation(() => {
 
 describe('deleteUser handler', () => {
   beforeAll(() => {
-    process.env.INVENTORY_TABLE_NAME = 'Users';
+    process.env.USERS_TABLE_NAME = 'Users';
   });
 
   beforeEach(() => {

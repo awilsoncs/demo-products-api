@@ -1,10 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
-
+import { Product } from './models';
+import { Meta } from '../shared/models';
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
-  const tableName = process.env.INVENTORY_TABLE_NAME;
+  const tableName = process.env.PRODUCTS_TABLE_NAME;
   const dynamoDb = new DynamoDB.DocumentClient();
 
   if (!event.body) {
@@ -14,16 +15,16 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     };
   }
 
-  const { username, password } = JSON.parse(event.body);
+  const { name, price, description, quantity } = JSON.parse(event.body);
 
-  if (!username || !password) {
+  if (!name || !price || !description || !quantity) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Username and password are required' }),
+      body: JSON.stringify({ error: 'Name, price, description, and quantity are required' }),
     };
   }
 
-  const userId = uuidv4();
+  const productId = uuidv4();
 
   if (!tableName) {
     return {
@@ -32,19 +33,12 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
     };
   }
 
+  const meta = new Meta('system', new Date(), 'system', new Date());
+  const product = new Product(productId, name, price, description, quantity, meta);
+
   const params = {
     TableName: tableName,
-    Item: {
-      userId,
-      username,
-      password,
-      meta: {
-        created_at: new Date().toISOString(),
-        created_by: 'system',
-        updated_at: new Date().toISOString(),
-        updated_by: 'system',
-      },
-    },
+    Item: product.toJson(product),
   };
 
   try {
@@ -56,7 +50,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Could not create user' }),
+      body: JSON.stringify({ error: 'Could not create product' }),
     };
   }
 };

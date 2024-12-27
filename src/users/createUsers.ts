@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
-  const tableName = process.env.INVENTORY_TABLE_NAME;
+  const tableName = process.env.USERS_TABLE_NAME;
   const dynamoDb = new DynamoDB.DocumentClient();
 
   if (!event.body) {

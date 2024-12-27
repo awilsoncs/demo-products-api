@@ -17,7 +17,7 @@ DynamoDB.DocumentClient.prototype.update = jest.fn().mockImplementation(() => ({
 
 describe('updateUser handler', () => {
     beforeAll(() => {
-        process.env.INVENTORY_TABLE_NAME = 'Users';
+        process.env.USERS_TABLE_NAME = 'Users';
     });
 
     beforeEach(() => {
