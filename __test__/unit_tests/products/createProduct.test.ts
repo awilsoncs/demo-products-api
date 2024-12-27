@@ -21,15 +21,11 @@ DynamoDB.DocumentClient.prototype.put = jest.fn().mockImplementation(() => ({
 }));
 
 describe('createProduct handler', () => {
-    const tableName = 'test-table';
-
+    const tableName = 'Products';
     const context: Context = {} as any;
 
-    beforeAll(() => {
-        process.env.INVENTORY_TABLE_NAME = tableName;
-    });
-
     beforeEach(() => {
+        process.env.PRODUCTS_TABLE_NAME = tableName;
         jest.clearAllMocks();
     });
 
@@ -56,7 +52,7 @@ describe('createProduct handler', () => {
     });
 
     it('should return 500 if table name is not defined', async () => {
-        delete process.env.INVENTORY_TABLE_NAME;
+        delete process.env.PRODUCTS_TABLE_NAME;
 
         const event: APIGatewayProxyEvent = {
             body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
@@ -97,9 +93,8 @@ describe('createProduct handler', () => {
             body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
         } as any;
 
-        mockDynamoDbPut.mockReturnValue({
-            promise: jest.fn().mockRejectedValue(new Error('DynamoDB error')),
-        });
+        mockDynamoDbPut.mockRejectedValue(new Error('DynamoDB error'));
+
 
         const result = await handler(event, context);
 
