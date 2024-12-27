@@ -43,6 +43,36 @@ functions:
       - http:
           path: /users/{id}
           method: delete
+  createProduct:
+      handler: src/products/createProduct.handler
+      events:
+        - http:
+            path: /products
+            method: post
+  getProduct:
+      handler: src/products/getProduct.handler
+      events:
+        - http:
+            path: /products/{productId}
+            method: get
+  getProducts:
+      handler: src/products/getProducts.handler
+      events:
+        - http:
+            path: /products
+            method: get
+  updateProduct:
+      handler: src/products/updateProduct.handler
+      events:
+        - http:
+            path: /products
+            method: put
+  deleteProduct:
+      handler: src/products/deleteProduct.handler
+      events:
+        - http:
+            path: /products/{productId}
+            method: delete
 
 resources:
   Resources:
@@ -59,15 +89,16 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
     ProductsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: Products
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: productId
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: productId
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
