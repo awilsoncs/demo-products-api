@@ -23,7 +23,7 @@ describe('getProduct handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.PRODUCTS_TABLE_NAME = 'test-table';
+    process.env.TABLE_NAME = 'test-table';
   });
 
   it('should return 404 if product is not found', async () => {
@@ -33,23 +33,23 @@ describe('getProduct handler', () => {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(404);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Product not found' });
+    expect(result.body).toEqual('Product not found');
   });
 
   it('should return 500 if table name is not defined', async () => {
-    delete process.env.PRODUCTS_TABLE_NAME;
+    delete process.env.TABLE_NAME;
 
     const event = {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Could not fetch product' });
+    expect(result.body).toEqual('Could not fetch product');
   });
 
   it('should return the product and status 200', async () => {
@@ -60,10 +60,10 @@ describe('getProduct handler', () => {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(200);
-    expect(JSON.parse(result.body)).toEqual(product);
+    expect(result.body).toEqual(product);
     expect(mDocumentClient.get).toHaveBeenCalledWith({
       TableName: 'test-table',
       Key: { productId: '123' },
@@ -77,9 +77,9 @@ describe('getProduct handler', () => {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Could not fetch product' });
+    expect(result.body).toEqual('Could not fetch product');
   });
 });

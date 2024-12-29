@@ -1,11 +1,9 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-
-export const handler: APIGatewayProxyHandler = async (event, context) => {
+export const handler = async (): Promise<any> => {
   return {
     statusCode: 200,
-    body: JSON.stringify({
+    body: {
       message: 'Health check successful',
       timestamp: new Date().toISOString(),
-    }),
+    },
   };
 };

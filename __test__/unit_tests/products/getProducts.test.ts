@@ -23,7 +23,7 @@ describe('getProducts handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.PRODUCTS_TABLE_NAME = 'test-table';
+    process.env.TABLE_NAME = 'test-table';
   });
 
   it('should return 200 and the list of products', async () => {
@@ -35,10 +35,10 @@ describe('getProducts handler', () => {
 
     const event = {} as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler();
 
     expect(result.statusCode).toBe(200);
-    expect(JSON.parse(result.body)).toEqual(products);
+    expect(result.body).toEqual(products);
     expect(mDocumentClient.scan).toHaveBeenCalledWith({
       TableName: 'test-table',
     });
@@ -49,9 +49,9 @@ describe('getProducts handler', () => {
 
     const event = {} as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler();
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Could not fetch products' });
+    expect(result.body).toEqual('Could not fetch products');
   });
 });

@@ -23,7 +23,7 @@ describe('deleteProduct handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.PRODUCTS_TABLE_NAME = 'test-table';
+    process.env.TABLE_NAME = 'test-table';
   });
 
   it('should return 400 if productId is not provided', async () => {
@@ -31,23 +31,23 @@ describe('deleteProduct handler', () => {
       pathParameters: {},
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Product ID is required' });
+    expect(result.body).toEqual('Product ID is required');
   });
 
   it('should return 500 if table name is not defined', async () => {
-    delete process.env.PRODUCTS_TABLE_NAME;
+    delete process.env.TABLE_NAME;
 
     const event = {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Table name is not defined in environment variables' });
+    expect(result.body).toEqual('Table name is not defined in environment variables');
   });
 
   it('should delete the product and return 200', async () => {
@@ -57,10 +57,10 @@ describe('deleteProduct handler', () => {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(200);
-    expect(JSON.parse(result.body)).toEqual({ message: 'Product deleted successfully' });
+    expect(result.body).toEqual('Product deleted successfully');
     expect(mDocumentClient.delete).toHaveBeenCalledWith({
       TableName: 'test-table',
       Key: { productId: '123' },
@@ -74,9 +74,9 @@ describe('deleteProduct handler', () => {
       pathParameters: { productId: '123' },
     } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Could not delete product' });
+    expect(result.body).toEqual('Could not delete product');
   });
 });

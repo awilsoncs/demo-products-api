@@ -1,66 +1,61 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 
-export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
-    const tableName = process.env.PRODUCTS_TABLE_NAME;
-    const dynamoDb = new DynamoDB.DocumentClient();
+const RESERVED_RESPONSE = `Error: You're using AWS reserved keywords as attributes`,
+  DYNAMODB_EXECUTION_ERROR = `Could not update product`;
 
-    if (!event.body) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Invalid request, no body provided' }),
-        };
-    }
 
-    const { productId, name, price, description, quantity } = JSON.parse(event.body);
+export const handler = async (event: any = {}): Promise<any> => {
+  const tableName = process.env.TABLE_NAME;
+  const primaryKey = 'productId';
+  const db = new DynamoDB.DocumentClient();
+  const productId = event.pathParameters?.productId;
 
-    if (!productId) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({ error: 'Product ID is required' }),
-        };
-    }
+  if (!tableName) {
+    return { statusCode: 500, body: 'Table name is not defined in environment variables' };
+  }
 
-    if (!tableName) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Table name is not defined in environment variables' }),
-        };
-    }
+  if (!event.body) {
+    return { statusCode: 400, body: 'Invalid request, no body provided' };
+  }
 
-    const params = {
-        TableName: tableName,
-        Key: { productId },
-        UpdateExpression: 'set #name = :name, #price = :price, #description = :description, #quantity = :quantity, #updated_at = :updated_at',
-        ExpressionAttributeNames: {
-            '#name': 'name',
-            '#price': 'price',
-            '#description': 'description',
-            '#quantity': 'quantity',
-            '#updated_at': 'meta.updated_at',
-        },
-        ExpressionAttributeValues: {
-            ':name': name,
-            ':price': price,
-            ':description': description,
-            ':quantity': quantity,
-            ':updated_at': new Date().toISOString(),
-        },
-        ReturnValues: 'ALL_NEW',
-    };
+  if (!productId) {
+    return { statusCode: 400, body: 'Product ID is required' };
+  }
 
-    try {
-        const result = await dynamoDb.update(params).promise();
-        console.log(result);
-        return {
-            statusCode: 200,
-            body: JSON.stringify(result.Attributes),
-        };
-    } catch (error) {
-        console.error(error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Could not update product' }),
-        };
-    }
+  const editedItem: any = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
+
+  if (editedItem.productId && editedItem.productId !== productId) {
+    return { statusCode: 400, body: 'Product ID in body does not match path' };
+  }
+
+  const editedItemProperties = Object.keys(editedItem);
+  if (!editedItem || editedItemProperties.length < 1) {
+    return { statusCode: 400, body: 'invalid request, no arguments provided' };
+  }
+
+  const firstProperty = editedItemProperties.splice(0, 1);
+  const params: any = {
+    TableName: tableName,
+    Key: {
+      [primaryKey]: productId
+    },
+    UpdateExpression: `set ${firstProperty} = :${firstProperty}`,
+    ExpressionAttributeValues: {},
+    ReturnValues: 'UPDATED_NEW'
+  }
+  params.ExpressionAttributeValues[`:${firstProperty}`] = editedItem[`${firstProperty}`];
+
+  editedItemProperties.forEach(property => {
+    params.UpdateExpression += `, ${property} = :${property}`;
+    params.ExpressionAttributeValues[`:${property}`] = editedItem[property];
+  });
+
+  try {
+    await db.update(params).promise();
+    return { statusCode: 204, body: '' };
+  } catch (dbError: any) {
+    const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?
+      RESERVED_RESPONSE : DYNAMODB_EXECUTION_ERROR;
+    return { statusCode: 500, body: errorResponse };
+  }
 };

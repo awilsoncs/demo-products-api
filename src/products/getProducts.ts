@@ -1,9 +1,8 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
 
-export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+export const handler = async (): Promise<any> => {
   const dynamoDb = new DynamoDB.DocumentClient();
-  const tableName = process.env.PRODUCTS_TABLE_NAME!;
+  const tableName = process.env.TABLE_NAME!;
 
   const params = {
     TableName: tableName,
@@ -11,14 +10,8 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 
   try {
     const data = await dynamoDb.scan(params).promise();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data.Items),
-    };
+    return { statusCode: 200, body: data.Items };
   } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'Could not fetch products' }),
-    };
+    return { statusCode: 500, body: 'Could not fetch products' };
   }
 };

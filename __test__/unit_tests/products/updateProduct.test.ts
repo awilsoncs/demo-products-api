@@ -23,73 +23,75 @@ describe('updateProduct handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.PRODUCTS_TABLE_NAME = 'test-table';
+    process.env.TABLE_NAME = 'test-table';
   });
 
   it('should return 400 if no body is provided', async () => {
-    const event = {} as APIGatewayProxyEvent;
+    const event = {
+      pathParameters: { productId: '123' },
+      body: null,
+    } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Invalid request, no body provided' });
+    expect(result.body).toEqual('Invalid request, no body provided');
   });
 
   it('should return 400 if productId is not provided', async () => {
     const event = {
+      pathParameters: {},
       body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
     } as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Product ID is required' });
+    expect(result.body).toEqual('Product ID is required');
   });
 
   it('should return 500 if table name is not defined', async () => {
-    delete process.env.PRODUCTS_TABLE_NAME;
+    delete process.env.TABLE_NAME;
 
     const event = {
+      pathParameters: { productId: '123' },
       body: JSON.stringify({ productId: '123', name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
-    } as APIGatewayProxyEvent;
+    } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Table name is not defined in environment variables' });
+    expect(result.body).toEqual('Table name is not defined in environment variables');
   });
 
   it('should update the product and return 200', async () => {
-    const updatedProduct = { productId: '123', name: 'Updated Product', price: 150, description: 'Updated Description', quantity: 20 };
+    const updatedProduct = {
+      name: 'Updated Product',
+      price: 150,
+      description: 'Updated Description',
+      quantity: 20
+    };
     mDocumentClient.promise.mockResolvedValueOnce({ Attributes: updatedProduct });
 
     const event = {
-      body: JSON.stringify({ productId: '123', name: 'Updated Product', price: 150, description: 'Updated Description', quantity: 20 }),
-    } as APIGatewayProxyEvent;
+      pathParameters: { productId: '123' },
+      body: JSON.stringify(updatedProduct),
+    } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
-    expect(result.statusCode).toBe(200);
-    expect(JSON.parse(result.body)).toEqual(updatedProduct);
+    expect(result.statusCode).toBe(204);
     expect(mDocumentClient.update).toHaveBeenCalledWith({
       TableName: 'test-table',
       Key: { productId: '123' },
-      UpdateExpression: 'set #name = :name, #price = :price, #description = :description, #quantity = :quantity, #updated_at = :updated_at',
-      ExpressionAttributeNames: {
-        '#name': 'name',
-        '#price': 'price',
-        '#description': 'description',
-        '#quantity': 'quantity',
-        '#updated_at': 'meta.updated_at',
-      },
+      UpdateExpression: 'set name = :name, price = :price, description = :description, quantity = :quantity',
       ExpressionAttributeValues: {
         ':name': 'Updated Product',
         ':price': 150,
         ':description': 'Updated Description',
         ':quantity': 20,
-        ':updated_at': expect.any(String),
       },
-      ReturnValues: 'ALL_NEW',
+      ReturnValues: 'UPDATED_NEW',
     });
   });
 
@@ -97,12 +99,13 @@ describe('updateProduct handler', () => {
     mDocumentClient.promise.mockRejectedValueOnce(new Error('DynamoDB error'));
 
     const event = {
+      pathParameters: { productId: '123' },
       body: JSON.stringify({ productId: '123', name: 'Updated Product', price: 150, description: 'Updated Description', quantity: 20 }),
-    } as APIGatewayProxyEvent;
+    } as unknown as APIGatewayProxyEvent;
 
-    const result = await handler(event, {} as Context);
+    const result = await handler(event);
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body)).toEqual({ error: 'Could not update product' });
+    expect(result.body).toEqual('Could not update product');
   });
 });
