@@ -23,7 +23,7 @@ describe('getProducts handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.TABLE_NAME = 'test-table';
+    process.env.PRODUCTS_TABLE_NAME = 'test-table';
   });
 
   it('should return 200 and the list of products', async () => {

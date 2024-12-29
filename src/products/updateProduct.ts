@@ -5,7 +5,7 @@ const RESERVED_RESPONSE = `Error: You're using AWS reserved keywords as attribut
 
 
 export const handler = async (event: any = {}): Promise<any> => {
-  const tableName = process.env.TABLE_NAME;
+  const tableName = process.env.PRODUCTS_TABLE_NAME;
   const primaryKey = 'productId';
   const db = new DynamoDB.DocumentClient();
   const productId = event.pathParameters?.productId;

@@ -23,7 +23,7 @@ describe('deleteProduct handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.TABLE_NAME = 'test-table';
+    process.env.PRODUCTS_TABLE_NAME = 'test-table';
   });
 
   it('should return 400 if productId is not provided', async () => {
@@ -38,7 +38,7 @@ describe('deleteProduct handler', () => {
   });
 
   it('should return 500 if table name is not defined', async () => {
-    delete process.env.TABLE_NAME;
+    delete process.env.PRODUCTS_TABLE_NAME;
 
     const event = {
       pathParameters: { productId: '123' },

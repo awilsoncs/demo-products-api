@@ -13,42 +13,6 @@ functions:
       - http:
           path: /health
           method: get
-  getUsers:
-    handler: src/users/getUsers.handler
-    events:
-      - http:
-          path: /users
-          method: get
-  getUser:
-    handler: src/users/getUser.handler
-    events:
-      - http:
-          path: /users/{id}
-          method: get
-  createUser:
-    handler: src/users/createUser.handler
-    events:
-      - http:
-          path: /users
-          method: post
-  updateUser:
-    handler: src/users/updateUser.handler
-    events:
-      - http:
-          path: /users/{id}
-          method: put
-  # deleteUser:
-  #   handler: src/users/deleteUser.handler
-  #   events:
-  #     - http:
-  #         path: /users/{id}
-  #         method: delete
-  # createProduct:
-  #     handler: src/products/createProduct.handler
-  #     events:
-  #       - http:
-  #           path: /products
-  #           method: post
   getProduct:
       handler: src/products/getProduct.handler
       events:
@@ -61,18 +25,18 @@ functions:
         - http:
             path: /products
             method: get
-  # updateProduct:
-  #     handler: src/products/updateProduct.handler
-  #     events:
-  #       - http:
-  #           path: /products
-  #           method: put
-  # deleteProduct:
-  #     handler: src/products/deleteProduct.handler
-  #     events:
-  #       - http:
-  #           path: /products/{productId}
-  #           method: delete
+  updateProduct:
+      handler: src/products/updateProduct.handler
+      events:
+        - http:
+            path: /products
+            method: put
+  deleteProduct:
+      handler: src/products/deleteProduct.handler
+      events:
+        - http:
+            path: /products/{productId}
+            method: delete
 
 resources:
   Resources:
@@ -95,4 +59,4 @@ resources:
       Value:
         Ref: ProductTable
       Export:
-        Name: TABLE_NAME
+        Name: PRODUCTS_TABLE_NAME

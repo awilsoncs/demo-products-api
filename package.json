@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "jest --watchAll --detectOpenHandles"
+    "test": "jest",
+    "test-watch": "jest --watchAll"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.146",

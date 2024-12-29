@@ -2,7 +2,7 @@ import { DynamoDB } from 'aws-sdk';
 
 export const handler = async (event: any = {}): Promise<any> => {
   const dynamoDb = new DynamoDB.DocumentClient();
-  const tableName = process.env.TABLE_NAME!;
+  const tableName = process.env.PRODUCTS_TABLE_NAME!;
   const productId = event.pathParameters?.productId;
 
   const params = {

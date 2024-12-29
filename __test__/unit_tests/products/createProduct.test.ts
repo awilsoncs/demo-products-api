@@ -21,7 +21,7 @@ describe('createProduct handler', () => {
     const tableName = 'Products';
 
     beforeEach(() => {
-        process.env.TABLE_NAME = tableName;
+        process.env.PRODUCTS_TABLE_NAME = tableName;
         jest.clearAllMocks();
     });
 
@@ -48,7 +48,7 @@ describe('createProduct handler', () => {
     });
 
     it('should return 500 if table name is not defined', async () => {
-        delete process.env.TABLE_NAME;
+        delete process.env.PRODUCTS_TABLE_NAME;
 
         const event: APIGatewayProxyEvent = {
             body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),

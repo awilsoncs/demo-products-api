@@ -2,7 +2,7 @@ import { DynamoDB } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
 export const handler = async (event: any = {}): Promise<any> => {
-  const tableName = process.env.TABLE_NAME;
+  const tableName = process.env.PRODUCTS_TABLE_NAME;
   const dynamoDb = new DynamoDB.DocumentClient();
 
   if (!tableName) {
