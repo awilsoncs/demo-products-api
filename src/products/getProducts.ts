@@ -10,7 +10,7 @@ export const handler = async (): Promise<any> => {
 
   try {
     const data = await dynamoDb.scan(params).promise();
-    return { statusCode: 200, body: data.Items };
+    return { statusCode: 200, body: JSON.stringify(data.Items) };
   } catch (error) {
     return { statusCode: 500, body: 'Could not fetch products' };
   }

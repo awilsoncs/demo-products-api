@@ -1,9 +1,9 @@
 export const handler = async (): Promise<any> => {
   return {
     statusCode: 200,
-    body: {
+    body: JSON.stringify({
       message: 'Health check successful',
       timestamp: new Date().toISOString(),
-    },
+    }),
   };
 };

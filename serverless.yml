@@ -1,10 +1,28 @@
-service: inventory-management
+app: demo-shop-service
+service: products-api
+org: acwilsontech
 
 provider:
   name: aws
   runtime: nodejs20.x
   stage: dev
   region: us-east-1
+  environment:
+    PRODUCTS_TABLE_NAME: ${self:service}-products-${sls:stage}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:PutItem'
+            - 'dynamodb:Get*'
+            - 'dynamodb:Scan*'
+            - 'dynamodb:UpdateItem'
+            - 'dynamodb:DeleteItem'
+          Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-products-${sls:stage}
+
+package:
+  individually: true
 
 functions:
   healthCheck:
@@ -13,6 +31,12 @@ functions:
       - http:
           path: /health
           method: get
+  createProduct:
+    handler: src/products/createProduct.handler
+    events:
+      - http:
+          path: /products
+          method: post
   getProduct:
       handler: src/products/getProduct.handler
       events:
@@ -43,7 +67,7 @@ resources:
     ProductsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: Products
+        TableName: ${self:service}-products-${sls:stage}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -54,9 +78,3 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-  Outputs:
-    InventoryTableName:
-      Value:
-        Ref: ProductTable
-      Export:
-        Name: PRODUCTS_TABLE_NAME

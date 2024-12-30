@@ -13,7 +13,7 @@ export const handler = async (event: any = {}): Promise<any> => {
   try {
     const data = await dynamoDb.get(params).promise();
     if (data.Item) {
-      return { statusCode: 200, body: data.Item };
+      return { statusCode: 200, body: JSON.stringify(data.Item) };
     } else {
       return { statusCode: 404, body: 'Product not found' };
     }

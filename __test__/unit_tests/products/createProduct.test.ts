@@ -33,7 +33,7 @@ describe('createProduct handler', () => {
         const result = await handler(event);
 
         expect(result.statusCode).toBe(400);
-        expect(result.body).toEqual('Invalid request, no body provided');
+        expect(result.body).toEqual('Error: Invalid request, no body provided');
     });
 
     it('should return 400 if required fields are missing', async () => {
@@ -44,25 +44,27 @@ describe('createProduct handler', () => {
         const result = await handler(event);
 
         expect(result.statusCode).toBe(400);
-        expect(result.body).toEqual('Name, price, description, and quantity are required');
+        expect(result.body).toEqual('Error: Name, price, description, and quantity are required');
     });
 
     it('should return 500 if table name is not defined', async () => {
         delete process.env.PRODUCTS_TABLE_NAME;
 
         const event: APIGatewayProxyEvent = {
-            body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
+            body: JSON.stringify({
+              name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
         } as any;
 
         const result = await handler(event);
 
         expect(result.statusCode).toBe(500);
-        expect(result.body).toEqual('Table name is not defined in environment variables');
+        expect(result.body).toEqual('Error: Table name is not defined in environment variables');
     });
 
     it('should create a product and return 201', async () => {
         const event: APIGatewayProxyEvent = {
-            body: JSON.stringify({ name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
+            body: JSON.stringify({
+              name: 'Test Product', price: 100, description: 'Test Description', quantity: 10 }),
         } as any;
 
         const productId = 'test-uuid';
@@ -75,8 +77,8 @@ describe('createProduct handler', () => {
         const result = await handler(event);
 
         expect(result.statusCode).toBe(201);
-        const responseBody = result.body;
-        expect(responseBody.productId).toBe(productId);
+        const responseBody = JSON.parse(result.body);
+        expect(responseBody.id).toBe(productId);
         expect(responseBody.name).toBe('Test Product');
         expect(responseBody.price).toBe(100);
         expect(responseBody.description).toBe('Test Description');
@@ -94,6 +96,6 @@ describe('createProduct handler', () => {
         const result = await handler(event);
 
         expect(result.statusCode).toBe(500);
-        expect(result.body).toEqual('Could not create product');
+        expect(result.body).toEqual('Error: Could not create product');
     });
 });

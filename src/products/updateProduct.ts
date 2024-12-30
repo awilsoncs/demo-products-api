@@ -51,8 +51,8 @@ export const handler = async (event: any = {}): Promise<any> => {
   });
 
   try {
-    await db.update(params).promise();
-    return { statusCode: 204, body: '' };
+    const vals = await db.update(params).promise();
+    return { statusCode: 204, body: JSON.stringify(vals.Attributes) };
   } catch (dbError: any) {
     const errorResponse = dbError.code === 'ValidationException' && dbError.message.includes('reserved keyword') ?
       RESERVED_RESPONSE : DYNAMODB_EXECUTION_ERROR;

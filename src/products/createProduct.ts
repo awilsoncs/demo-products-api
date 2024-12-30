@@ -6,20 +6,20 @@ export const handler = async (event: any = {}): Promise<any> => {
   const dynamoDb = new DynamoDB.DocumentClient();
 
   if (!tableName) {
-    return { statusCode: 500, body: 'Table name is not defined in environment variables' };
+    return { statusCode: 500, body: 'Error: Table name is not defined in environment variables' };
   }
 
   if (!event.body) {
-    return { statusCode: 400, body: 'Invalid request, no body provided' };
+    return { statusCode: 400, body: 'Error: Invalid request, no body provided' };
   }
 
   const item = JSON.parse(event.body);
 
   if (!item.name || !item.price || !item.description || !item.quantity) {
-    return { statusCode: 400, body: 'Name, price, description, and quantity are required' };
+    return { statusCode: 400, body: 'Error: Name, price, description, and quantity are required' };
   }
 
-  const itemData = {productId: uuidv4(), ...item};
+  const itemData = {id: uuidv4(), ...item};
 
   const params = {
     TableName: tableName,
@@ -27,9 +27,11 @@ export const handler = async (event: any = {}): Promise<any> => {
   };
 
   try {
+    console.info('Creating product with data: ', itemData);
     await dynamoDb.put(params).promise();
-    return { statusCode: 201, body: itemData };
+    return { statusCode: 201, body: JSON.stringify(itemData) };
   } catch (error) {
-    return { statusCode: 500, body: 'Could not create product' };
+    console.error('Error creating product: ', error);
+    return { statusCode: 500, body: 'Error: Could not create product' };
   }
 };

@@ -38,7 +38,7 @@ describe('getProducts handler', () => {
     const result = await handler();
 
     expect(result.statusCode).toBe(200);
-    expect(result.body).toEqual(products);
+    expect(JSON.parse(result.body)).toEqual(products);
     expect(mDocumentClient.scan).toHaveBeenCalledWith({
       TableName: 'test-table',
     });

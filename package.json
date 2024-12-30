@@ -1,7 +1,8 @@
 {
   "scripts": {
     "test": "jest",
-    "test-watch": "jest --watchAll"
+    "test-watch": "jest --watchAll",
+    "swagger": "node ./swagger.js"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.146",
@@ -14,11 +15,8 @@
     "ts-jest": "^29.2.5"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.716.0",
-    "@aws-sdk/lib-dynamodb": "^3.716.0",
     "@types/node": "^22.10.2",
     "aws-sdk": "^2.1692.0",
-    "class-validator": "^0.14.1",
     "typescript": "^5.7.2"
   }
 }
