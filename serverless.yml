@@ -2,13 +2,17 @@ app: demo-shop-service
 service: products-api
 org: acwilsontech
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs20.x
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   region: us-east-1
   environment:
     PRODUCTS_TABLE_NAME: ${self:service}-products-${sls:stage}
+    API_KEYS_TABLE_NAME: ${self:service}-api-keys-${sls:stage}
   iam:
     role:
       statements:
@@ -20,47 +24,64 @@ provider:
             - 'dynamodb:UpdateItem'
             - 'dynamodb:DeleteItem'
           Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-products-${sls:stage}
-
-package:
-  individually: true
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:GetItem'
+          Resource: arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-api-keys-${sls:stage}
 
 functions:
+# public endpoints
+  authHandler:
+    handler: src/auth/auth.handler
+
   healthCheck:
     handler: src/healthCheck.handler
     events:
       - http:
           path: /health
           method: get
+
+  # Private Endpoints
+  # Products
   createProduct:
     handler: src/products/createProduct.handler
     events:
       - http:
           path: /products
           method: post
+          authorizer: ${self:custom.authorizer.users}
+
   getProduct:
       handler: src/products/getProduct.handler
       events:
         - http:
             path: /products/{productId}
             method: get
+            authorizer: ${self:custom.authorizer.users}
+
   getProducts:
       handler: src/products/getProducts.handler
       events:
         - http:
             path: /products
             method: get
+            authorizer: ${self:custom.authorizer.users}
+
   updateProduct:
       handler: src/products/updateProduct.handler
       events:
         - http:
             path: /products
             method: put
+            authorizer: ${self:custom.authorizer.users}
+
   deleteProduct:
       handler: src/products/deleteProduct.handler
       events:
         - http:
             path: /products/{productId}
             method: delete
+            authorizer: ${self:custom.authorizer.users}
 
 resources:
   Resources:
@@ -77,4 +98,24 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    ApiKeysTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-api-keys-${sls:stage}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
 
+custom:
+  authorizer:
+    users:
+      name: authHandler
+      type: TOKEN
+      identitySource: method.request.header.X-Api-Key
+      identityValidationExpression: ^[a-zA-Z0-9-]{36}$
