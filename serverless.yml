@@ -111,6 +111,29 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    ApiGatewayCloudWatchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: serverlessApiGatewayCloudWatchRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: apigateway.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: APIGatewayCloudWatchLogs
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: arn:aws:logs:${aws:region}:${aws:accountId}:log-group:/aws/api-gateway/*
+
 
 custom:
   authorizer:
