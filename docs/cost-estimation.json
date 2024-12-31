@@ -1,0 +1,88 @@
+{
+	"Name": "Demo Products API",
+	"Total Cost": {
+		"monthly": "103.50",
+		"upfront": "0.00",
+		"12 months": "1242.00"
+	},
+	"Metadata": {
+		"Currency": "USD",
+		"Locale": "en_US",
+		"Created On": "12/30/2024",
+		"Legal Disclaimer": "AWS Pricing Calculator provides only an estimate of your AWS fees and doesn't include any taxes that might apply. Your actual fees depend on a variety of factors, including your actual usage of AWS services.",
+		"Share Url": "https://calculator.aws/#/estimate?id=f7c75b0fa03430ecea92106a7199b45aaf2b462c"
+	},
+	"Groups": {
+		"Services": [
+			{
+				"Service Name": "AWS Lambda",
+				"Region": "US East (N. Virginia)",
+				"Status": "",
+				"Service Cost": {
+					"monthly": "56.53",
+					"upfront": "0.00",
+					"12 months": "678.36"
+				},
+				"Properties": {
+					"Architecture": "x86",
+					"Amount of ephemeral storage allocated": "512 MB",
+					"Invoke Mode": "Buffered",
+					"Number of requests": "50000 per day",
+					"Concurrency": "10",
+					"Time for which Provisioned Concurrency is enabled": "720 hours",
+					"Number of requests for Provisioned Concurrency": "50000 per day"
+				}
+			},
+			{
+				"Service Name": "DynamoDB on-demand capacity",
+				"Description": "DynamoDB",
+				"Region": "US East (N. Virginia)",
+				"Status": "",
+				"Service Cost": {
+					"monthly": "34.92",
+					"upfront": "0.00",
+					"12 months": "419.04"
+				},
+				"Properties": {
+					"Table class": "Standard",
+					"Average item size (all attributes)": "100 KB",
+					"Data storage size": "10 GB"
+				}
+			},
+			{
+				"Service Name": "Amazon CloudWatch",
+				"Description": "Cloudwatch",
+				"Region": "US East (N. Virginia)",
+				"Status": "",
+				"Service Cost": {
+					"monthly": "5.04",
+					"upfront": "0.00",
+					"12 months": "60.54"
+				},
+				"Properties": {
+					"Standard Logs: Data Ingested": "10 GB"
+				}
+			},
+			{
+				"Service Name": "Amazon API Gateway",
+				"Description": "API Gateway",
+				"Region": "US East (N. Virginia)",
+				"Status": "",
+				"Service Cost": {
+					"monthly": "7.00",
+					"upfront": "0.00",
+					"12 months": "84.00"
+				},
+				"Properties": {
+					"HTTP API requests units": "millions",
+					"Average size of each request": "34 KB",
+					"REST API request units": "millions",
+					"Cache memory size (GB)": "None",
+					"WebSocket message units": "thousands",
+					"Average message size": "32 KB",
+					"Requests": "2 per month"
+				}
+			}
+		]
+	}
+}
